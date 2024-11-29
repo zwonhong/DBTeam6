@@ -1,3 +1,4 @@
+// package twitter;
 import java.awt.*;
 import javax.swing.*;
 
@@ -126,7 +127,9 @@ public class twitter {
                 rightPanel.removeAll();
         
                 // 게시글 내용을 보여주는 Article 생성
-                Article article = new Article("tweet");
+                String articleid="article1";
+                String userid="user1";
+                Article article = new Article(articleid,userid);
         
                 // JScrollPane으로 감싸기
                 JScrollPane scrollPane = new JScrollPane(article.getArticlePanel());

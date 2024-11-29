@@ -1,4 +1,4 @@
-package twitter;
+// package twitter;
 
 import java.sql.*;
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class DatabaseService {
     // 데이터베이스 연결 설정
     private void initDatabaseConnection() {
         try {
-            String url = "jdbc:mysql://localhost:3306/university";
+            String url = "jdbc:mysql://localhost:3306/twitter?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC";
             String username = "root";
             String password = "1234";
 			System.out.println("success");

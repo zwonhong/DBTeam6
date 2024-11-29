@@ -1,4 +1,4 @@
-package twitter;
+// package twitter;
 import java.awt.*;
 import java.sql.*;
 import java.io.File;
@@ -100,7 +100,8 @@ public class Article {
 
             if (parent != null) {
                 parent.remove(articlePanel); // 현재 Article 패널 제거
-                OtherProfile otherProfile = new OtherProfile(); // OtherProfile 객체 생성
+//임의 데이터
+                OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
                 parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
                 parent.revalidate(); // UI 갱신
                 parent.repaint(); // 화면 갱신
@@ -146,7 +147,8 @@ public class Article {
 
                 if (parent != null) {
                     parent.remove(articlePanel); // 현재 Article 패널 제거
-                    OtherProfile otherProfile = new OtherProfile(); // OtherProfile 객체 생성
+// 임의 데이터
+                    OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
                     parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
                     parent.revalidate(); // UI 갱신
                     parent.repaint(); // 화면 갱신
@@ -340,7 +342,8 @@ public class Article {
 
             if (parent != null) {
                 parent.remove(articlePanel); // 현재 Article 패널 제거
-                OtherProfile otherProfile = new OtherProfile(); // OtherProfile 객체 생성
+// 임의 데이터
+                OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
                 parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
                 parent.revalidate(); // UI 갱신
                 parent.repaint(); // 화면 갱신
