@@ -1,13 +1,9 @@
-import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import java.util.regex.Pattern;
+import javax.swing.*;
 
 public class LoginRegisterApp {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/UserDB";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "your_password";
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LoginRegisterApp().createAndShowGUI());
     }
@@ -24,10 +20,6 @@ public class LoginRegisterApp {
 
         frame.setVisible(true);
     }
-
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-    }
 }
 
 // Login screen
@@ -42,7 +34,7 @@ class LoginPanel extends JPanel {
         logoPanel.setBackground(Color.WHITE); // 배경을 흰색으로 설정
 
         // Load and resize the logo
-        ImageIcon originalIcon = new ImageIcon("D:\\DBonlyFront\\lib\\twitter_logo.png");
+        ImageIcon originalIcon = new ImageIcon("src/twitter_logo.jpeg");
         Image scaledImage = originalIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
@@ -103,9 +95,9 @@ class LoginPanel extends JPanel {
             String username = txtUsername.getText();
             String password = String.valueOf(txtPassword.getPassword());
 
-            try (Connection conn = LoginRegisterApp.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(
-                         "SELECT * FROM Users WHERE username = ? AND password = ?")) {
+            try (Connection conn = DBManager.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(
+                         "SELECT * FROM Users WHERE User_ID = ? AND password = ?")) {
                 stmt.setString(1, username);
                 stmt.setString(2, password);
                 ResultSet rs = stmt.executeQuery();
@@ -155,8 +147,8 @@ class RegisterPanel extends JPanel {
         JLabel lblPhone = new JLabel("Phone Number (01012345678):");
         JTextField txtPhone = new JTextField();
 
-        JLabel lblGender = new JLabel("Gender (m/f/others):");
-        JTextField txtGender = new JTextField();
+        JLabel lblGender = new JLabel("Gender (male/female/others):");
+        JComboBox<String> cbGender = new JComboBox<>(new String[]{"Male", "Female", "Others"});
 
         JButton btnRegister = new JButton("Register");
         JButton btnBack = new JButton("Back to Login");
@@ -174,7 +166,7 @@ class RegisterPanel extends JPanel {
         add(lblPhone);
         add(txtPhone);
         add(lblGender);
-        add(txtGender);
+        add(cbGender);
         add(btnRegister);
         add(btnBack);
 
@@ -186,7 +178,7 @@ class RegisterPanel extends JPanel {
             String confirmPassword = String.valueOf(txtConfirmPassword.getPassword());
             String birth = txtBirth.getText();
             String phone = txtPhone.getText();
-            String gender = txtGender.getText().toLowerCase();
+            String gender = cbGender.getSelectedItem().toString();
 
             // 입력 값 검증
             if (username.isEmpty() || password.isEmpty() || nickname.isEmpty()) {
@@ -206,23 +198,18 @@ class RegisterPanel extends JPanel {
             }
 
             // Phone number 검증 (10~11자리 숫자)
-            if (!Pattern.matches("\\d{10,11}", phone)) {
-                JOptionPane.showMessageDialog(this, "Phone number must be 10~11 digits without hyphens.");
+            if (!Pattern.matches("\\d{11}", phone)) {
+                JOptionPane.showMessageDialog(this, "Phone number must be 11 digits without hyphens.");
                 return;
             }
 
-            // Gender 값 검증 (m, f, others)
-            if (!gender.matches("^(m|f|others)$")) {
-                JOptionPane.showMessageDialog(this, "Gender must be one of 'm', 'f', or 'others'.");
-                return;
-            }
-
-            try (Connection conn = LoginRegisterApp.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(
-                         "INSERT INTO Users (username, password, nickname, birth, phone, gender) VALUES (?, ?, ?, ?, ?, ?)")) {
+            try (Connection conn = DBManager.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO Users (User_ID, nickname, password, profilImg, wallPaper, introduction, birth, phoneNum, gender) " +
+                                        "VALUES (?, ?, ?, NULL, NULL, NULL, ?, ?, ?)")) {
                 stmt.setString(1, username);
-                stmt.setString(2, password);
-                stmt.setString(3, nickname); // 닉네임 저장
+                stmt.setString(2, nickname);
+                stmt.setString(3, password); // 닉네임 저장
                 stmt.setString(4, birth);
                 stmt.setString(5, phone);
                 stmt.setString(6, gender);
