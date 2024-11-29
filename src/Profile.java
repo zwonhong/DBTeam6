@@ -263,7 +263,7 @@ public class Profile {
         // TestArticle, TestComments, TestLikes에서 패널 가져오기
         TestArticle testArticle = new TestArticle(userID);
         TestComments testComments = new TestComments(userID);
-        TestLikes testLikes = new TestLikes();
+        TestLikes testLikes = new TestLikes(userID);
 
         JScrollPane articleScrollPane = new JScrollPane(testArticle.getArticlePanel());
         JScrollPane commentsScrollPane = new JScrollPane(testComments.getCommentsPanel());
