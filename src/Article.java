@@ -1,6 +1,10 @@
+package twitter;
 import java.awt.*;
+import java.sql.*;
+import java.io.File;
 import javax.swing.*;
 import java.awt.event.*; 
+import java.util.List;
 
 public class Article {
     private JPanel articlePanel;
@@ -8,12 +12,27 @@ public class Article {
     private JScrollPane scrollPane;  // scrollPane을 클래스의 인스턴스 변수로 선언
     private StringBuilder replyText; // 댓글 내용을 저장할 변수
 
-    public Article(String tweetContent) {
-        replyText = new StringBuilder(); // 댓글 저장을 위한 StringBuilder 초기화        
+    private DatabaseService databaseService;
+    private String currentArticleId; //게시물 아이디
+    private String currentUserId; //접속하고 있는 유저 아이디
+    
+    public Article(String articleId, String userId) {
+        
+        // 데이터베이스 연결 초기화
+        this.databaseService = new DatabaseService();
+    	
+        this.currentArticleId = articleId;
+        this.currentUserId = userId;
+        DatabaseService.ArticleDetails articleDetails = databaseService.loadArticleDetails(currentArticleId);
+
+        replyText = new StringBuilder(); // 댓글 저장을 위한 StringBuilder 초기화       
+
         // 오른쪽 패널 (Article 페이지 레이아웃 설정)
         articlePanel = new JPanel();
         articlePanel.setBackground(Color.BLACK); // 패널 배경색
         articlePanel.setLayout(null); // 자유 배치
+        
+//--------------------------------최상단 "<- post"-------------------------------
         
         JButton backButton = new JButton("←"); // Left arrow button
         JLabel postLabel = new JLabel("Post"); // Post label
@@ -33,10 +52,11 @@ public class Article {
             System.out.println("Back button clicked");
         });
 
-
         // Add components to the top panel
         articlePanel.add(backButton);
         articlePanel.add(postLabel);
+        
+//---------------------------게시물 프로필 패널 설정---------------------------
 
      // 상단 프로필 이미지 + 유저명, 닉네임 패널
         JPanel userPanel = new JPanel();
@@ -45,7 +65,8 @@ public class Article {
         userPanel.setBounds(10, 60, 800, 40); // 패널 위치
 
         // 프로필 이미지 버튼 (원형 이미지)
-        ImageIcon profileImageIcon = new ImageIcon("C:\\Users\\Notebook\\Desktop\\profile.png"); // 이미지 경로
+        String profileImagePath = articleDetails != null ? articleDetails.getProfileImg() : "default_profile.png";
+        ImageIcon profileImageIcon = new ImageIcon(profileImagePath);
         Image profileImage = profileImageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH); // 크기 조정
 
         JButton profileButton = new JButton() {
@@ -91,17 +112,19 @@ public class Article {
         // 패널에 추가
         userPanel.add(profileButton);
 
-        
+        String userID = articleDetails != null ? articleDetails.getuserID() : "Unknown";
+        String nickname = articleDetails != null ? articleDetails.getNickname() : "Unknown";
+           
         // 유저명과 닉네임 표시
         JPanel userInfoPanel = new JPanel();
         userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS)); // 세로로 정렬
         userInfoPanel.setBackground(Color.BLACK);
         userInfoPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0)); // 왼쪽에 10px 여백 추가
 
-        JLabel usernameLabel = new JLabel("nickname"); // 유저명
+        JLabel usernameLabel = new JLabel(nickname); // 유저명
         usernameLabel.setForeground(Color.WHITE);
         usernameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        JLabel nicknameLabel = new JLabel("@" + "userid"); // 닉네임
+        JLabel nicknameLabel = new JLabel("@" + userID); // 닉네임
         nicknameLabel.setForeground(Color.WHITE);
         nicknameLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
@@ -135,13 +158,14 @@ public class Article {
 
         articlePanel.add(userPanel);
         
-        // 상단선
+        
+        //--------------------- 상단선--------------------------
         JPanel horizontalLineUpper = new JPanel();
         horizontalLineUpper.setBackground(Color.WHITE); // 선 색: 흰색
         horizontalLineUpper.setBounds(1, 50, 800, 1); // x, y, width, height
         articlePanel.add(horizontalLineUpper);
 
-        // 트윗 내용 패널
+     // -----------------------트윗 내용 패널---------------------------
         JPanel tweetPanel = new JPanel();
         tweetPanel.setBackground(Color.BLACK); // 배경색
         tweetPanel.setBounds(0, horizontalLineUpper.getY() + 60, 800, 0); // 높이는 내용에 따라 변경
@@ -149,6 +173,7 @@ public class Article {
         articlePanel.add(tweetPanel);
         
         // 트윗 내용 (JTextArea 사용)
+        String tweetContent = articleDetails != null ? articleDetails.getContent() : "No content available";
         JTextArea tweetTextArea = new JTextArea(tweetContent); // 텍스트 내용
         tweetTextArea.setBackground(Color.BLACK); // 배경색
         tweetTextArea.setForeground(Color.WHITE); // 텍스트 색상
@@ -168,37 +193,42 @@ public class Article {
         
 
         // 생성 시간 JLabel 생성
-        JLabel creationTimeLabel = new JLabel("date:");
+        String creationTime = articleDetails != null ? articleDetails.getCreationTime() : "Unknown";
+        JLabel creationTimeLabel = new JLabel("date:"+ creationTime);
         creationTimeLabel.setForeground(Color.WHITE); // 텍스트 색상
         creationTimeLabel.setFont(new Font("Arial", Font.PLAIN, 14)); // 폰트 설정
-        creationTimeLabel.setBounds(20, tweetPanel.getY() + tweetPanel.getHeight()+20, 70, 20); // 위치 설정
+        creationTimeLabel.setBounds(20, tweetPanel.getY() + tweetPanel.getHeight()+20, 500, 20); // 위치 설정
 
         // 트윗 패널에 생성 시간 추가
         articlePanel.add(creationTimeLabel);
 
 
-        // 하단선1
+        // --------------------하단선1-----------------------
         horizontalLineLower = new JPanel();
         horizontalLineLower.setBackground(Color.WHITE); // 선 색: 흰색
         horizontalLineLower.setBounds(1, tweetPanel.getY() + tweetPanel.getHeight() +50 , 800, 1); // 동적 Y 좌표
         articlePanel.add(horizontalLineLower);
         
-     // 좋아요 버튼 생성
-        JButton likeButton = new JButton("like");
+     // -------------------좋아요 버튼 생성------------------
+        int likeCount = articleDetails != null ? databaseService.getLikesForArticle(currentArticleId) : 0;
+        JButton likeButton = new JButton("like"+likeCount);
         likeButton.setForeground(Color.WHITE);
         likeButton.setFont(new Font("Arial", Font.PLAIN, 16));
         likeButton.setBackground(Color.pink); // 배경색
         likeButton.setBorderPainted(false); // 기본 테두리 없애기
         likeButton.setFocusPainted(false); // 포커스 테두리 없애기
         likeButton.setBounds(700, tweetPanel.getY() + tweetPanel.getHeight(), 70, 40); // 위치 설정 (하단선 위 오른쪽 끝)
+        likeButton.setMargin(new Insets(0, 0, 0, 0));
 
         // 좋아요 버튼 클릭 이벤트 (토글)
         likeButton.addActionListener(e -> {
-            if (likeButton.getText().equals("like")) {
-                likeButton.setText("unlike"); // 버튼 텍스트 변경
+            if (likeButton.getText().equals("like "+ likeCount)) {
+                databaseService.addLikeToArticle(currentUserId, currentArticleId);  // 좋아요 추가
+                likeButton.setText("unlike "+ (likeCount+1)); // 버튼 텍스트 변경
                 likeButton.setForeground(Color.red); // 눌린 상태에서 빨간색으로 변경
-            } else {
-                likeButton.setText("like"); // 버튼 텍스트 원래대로 변경
+            }else {
+                databaseService.removeLikeFromArticle(currentUserId, currentArticleId);  // 좋아요 취소
+                likeButton.setText("like "+ (likeCount)); // 버튼 텍스트 원래대로 변경
                 likeButton.setForeground(Color.WHITE); // 취소 상태에서 원래 색상으로 변경
             }
         });
@@ -206,6 +236,7 @@ public class Article {
         // 트윗 내용 패널에 좋아요 버튼 추가
         articlePanel.add(likeButton);
         
+//---------------------------------댓글 입력 창-----------------------------        
      // 코멘트 입력칸 (JTextArea 사용) - 테두리 없애기
         JTextArea commentInput = new JTextArea();
         commentInput.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -238,7 +269,7 @@ public class Article {
             }
         });
         
-     // 'Reply' 버튼 추가
+     // --------------------'Reply' 버튼 추가----------------------
         JButton replyButton = new JButton("Reply");
         replyButton.setForeground(Color.WHITE);
         replyButton.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -246,6 +277,7 @@ public class Article {
         replyButton.setBorderPainted(false); // 기본 테두리 없애기
         replyButton.setFocusPainted(false); // 포커스 테두리 없애기
         replyButton.setBounds(700, tweetPanel.getY() + tweetPanel.getHeight() + 70, 70, 40); // 위치 설정 (댓글 입력칸 옆에 배치)
+        replyButton.setMargin(new Insets(0, 0, 0, 0));
 
         replyButton.addActionListener(e -> {
             replyText.setLength(0); // 기존 내용 초기화
@@ -254,6 +286,8 @@ public class Article {
             commentInput.setForeground(Color.GRAY); // 기본 텍스트 색상으로 되돌리기
             commentInput.setText("Post your reply");  // 기본 텍스트로 설정
             System.out.println("작성된 댓글: " + replyText);
+            databaseService.saveComment(currentUserId, currentArticleId, replyText.toString());// 데이터 베이스에 저장
+
         });
 
         // 댓글 입력칸과 reply 버튼 추가
@@ -267,11 +301,13 @@ public class Article {
         articlePanel.add(commentScrollPane);        
         
         
-     // // 댓글 입력창 옆에 동그란 이미지 버튼 추가
-        ImageIcon myProfileImageIcon = new ImageIcon("C:\\Users\\Notebook\\Desktop\\profile.png"); // 이미지 경로
-        Image myProfileImage = myProfileImageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH); // 이미지 크기 조정
+     //------------------댓글 입력창 옆에 프로필 이미지 버튼 추가-----------------
+        DatabaseService.UserProfile userProfile = databaseService.getUserProfile(currentUserId);
+        String userprofileImagePath = userProfile != null ? userProfile.getProfileImg() : "default_profile.png";
+        ImageIcon userProfileImageIcon = new ImageIcon(userprofileImagePath);
+        Image userprofileImage = userProfileImageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
 
-        JButton profileImageButton = new JButton() {
+        JButton userprofileImageButton = new JButton() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -284,46 +320,52 @@ public class Article {
                 g2d.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, getWidth(), getHeight()));
 
                 // 이미지 그리기
-                g2d.drawImage(myProfileImage, 0, 0, getWidth(), getHeight(), null);
+                g2d.drawImage(userprofileImage, 0, 0, getWidth(), getHeight(), null);
                 g2d.dispose();
             }
         };
 
-        profileImageButton.setPreferredSize(new Dimension(40, 40)); // 버튼 크기 설정
-        profileImageButton.setBorder(BorderFactory.createEmptyBorder()); // 테두리 없애기
-        profileImageButton.setContentAreaFilled(false); // 배경 투명으로 설정
-        profileImageButton.setFocusPainted(false); // 포커스 테두리 없애기
+        userprofileImageButton.setPreferredSize(new Dimension(40, 40)); // 버튼 크기 설정
+        userprofileImageButton.setBorder(BorderFactory.createEmptyBorder()); // 테두리 없애기
+        userprofileImageButton.setContentAreaFilled(false); // 배경 투명으로 설정
+        userprofileImageButton.setFocusPainted(false); // 포커스 테두리 없애기
 
         // 이미지 버튼을 댓글 입력칸 왼쪽에 배치
-        profileImageButton.setBounds(20, tweetPanel.getY() + tweetPanel.getHeight() + 70, 40, 40);  // 위치 설정
+        userprofileImageButton.setBounds(20, tweetPanel.getY() + tweetPanel.getHeight() + 70, 40, 40);  // 위치 설정
 
         // 이미지 버튼에 클릭 이벤트 추가
-        profileImageButton.addActionListener(e -> {
+        userprofileImageButton.addActionListener(e -> {
             // 이미지 버튼 클릭 시 수행할 기능
-            JOptionPane.showMessageDialog(articlePanel, "Profile image clicked!");    
+        	Container parent = articlePanel.getParent();
+
+            if (parent != null) {
+                parent.remove(articlePanel); // 현재 Article 패널 제거
+                OtherProfile otherProfile = new OtherProfile(); // OtherProfile 객체 생성
+                parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
+                parent.revalidate(); // UI 갱신
+                parent.repaint(); // 화면 갱신
+            } else {
+                JOptionPane.showMessageDialog(articlePanel, "Parent container not found.");
+            }
         });
 
         // 트윗 내용 패널에 이미지 버튼 추가
-        articlePanel.add(profileImageButton);
+        articlePanel.add(userprofileImageButton);
         
-        // 하단선2
+        // -----------------------하단선2--------------------------
         horizontalLineLower = new JPanel();
         horizontalLineLower.setBackground(Color.WHITE); // 선 색: 흰색
         horizontalLineLower.setBounds(1, tweetPanel.getY() + tweetPanel.getHeight() + 145 , 800, 1); // 동적 Y 좌표
         articlePanel.add(horizontalLineLower);
         
-     // 댓글을 저장하는 리스트 (더미 데이터)
-        String[][] dummyComments = {
-        	    {"user1", "John Doe", "This is comment 1"},
-        	    {"user2", "Jane Smith", "This is comment 2"},
-        	    {"user3", "Mike Brown", "This is comment 3"},
-        	    {"user4", "Alice Johnson", "This is comment 4"},
-        	    {"user5", "Bob White", "This is comment 5"},
-        	    {"user6", "Charlie Davis", "This is comment 6"},
-        	    {"user7", "Eve Adams", "This is comment 7"}
-        };
 
-     // 댓글을 표시할 패널
+        
+        
+        
+        
+//---------------------------------------댓글 패널 추가-------------------------------------
+        List<DatabaseService.CommentDetails> CommentDetails = databaseService.fetchComments(currentArticleId);
+        
         JPanel commentsPanel = new JPanel();
         commentsPanel.setLayout(null); // 자유 배치
         commentsPanel.setBackground(Color.BLACK);
@@ -332,16 +374,11 @@ public class Article {
 
         // 댓글을 추가하는 메서드 (댓글 추가마다 호출)
         int commentStartY = 0; // 첫 댓글의 Y 좌표
-
-        // 댓글이 추가될 때마다 반복
-        for (String[] commentData : dummyComments) {
-        	
-        	 String userId = commentData[0];    // 유저 아이디
-        	    String userName = commentData[1]; // 유저 이름
-        	    String commentText = commentData[2]; // 댓글 내용
-        	    
-            // 댓글 내용의 높이 계산
-            JTextArea commentTextArea = new JTextArea(commentText);
+        
+        for (DatabaseService.CommentDetails comment : CommentDetails) {
+        	String commentID = comment !=null ? comment.getcommentID(): "Unknown";
+        	// 댓글 내용의 높이 계산
+            JTextArea commentTextArea = new JTextArea(comment.getContent());
             commentTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
             commentTextArea.setWrapStyleWord(true);
             commentTextArea.setLineWrap(true);
@@ -357,7 +394,7 @@ public class Article {
             commentPanel.setBounds(0, commentStartY, 800, textHeight + 40); // 텍스트 높이에 맞게 댓글 패널 크기 설정
 
          // 유저 정보 라벨
-            JLabel userInfoLabel = new JLabel(userName+" @"+userId );
+            JLabel userInfoLabel = new JLabel(comment.getNickname() + " @" + comment.getuserID());
             userInfoLabel.setBounds(75, 5, 700, 20); // 유저 정보 위치와 크기
             userInfoLabel.setFont(new Font("Arial", Font.BOLD, 12));
             userInfoLabel.setForeground(Color.LIGHT_GRAY);
@@ -369,11 +406,11 @@ public class Article {
             commentTextArea.setForeground(Color.WHITE);
             commentPanel.add(commentTextArea);
 
-            // 댓글 작성자의 프로필 이미지
-            
-            
-            ImageIcon commentProfileImageIcon = new ImageIcon("C:\\Users\\Notebook\\Desktop\\profile.png");
+            // ------------------------댓글 작성자의 프로필 이미지-------------------            
+            String commentprofileImagePath = CommentDetails != null ? comment.getProfileImg() : "default_profile.png";
+            ImageIcon commentProfileImageIcon = new ImageIcon(commentprofileImagePath);
             Image commentProfileImage = commentProfileImageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            
             JButton commentProfileButton = new JButton() {
                 @Override
                 protected void paintComponent(Graphics g) {
@@ -398,28 +435,34 @@ public class Article {
             commentPanel.add(commentProfileButton);
 
             // 댓글 생성 시간을 표시하는 라벨
-            JLabel commentTimeLabel = new JLabel("5m ago"); // 더미 시간
-            commentTimeLabel.setBounds(75, textHeight + 20, 100, 20);
+            String commentcreationTime = CommentDetails != null ? comment.getCreationTime() : "Unknown";
+            JLabel commentTimeLabel = new JLabel("date:"+commentcreationTime); // 더미 시간
+            commentTimeLabel.setBounds(75, textHeight + 20, 500, 20);
             commentTimeLabel.setForeground(Color.GRAY);
             commentTimeLabel.setFont(new Font("Arial", Font.PLAIN, 12));
             commentPanel.add(commentTimeLabel);
             
-            // 댓글에 좋아요 버튼 추가
-            JButton commentLikeButton = new JButton("like");
+         // --------------------------댓글에 좋아요 버튼 추가---------------------------
+            int commentLikeCount = CommentDetails != null ? databaseService.getLikesForComment(commentID):0;
+            JButton commentLikeButton = new JButton("like "+ commentLikeCount);
             commentLikeButton.setForeground(Color.WHITE);
-            commentLikeButton.setFont(new Font("Arial", Font.PLAIN, 10));
+            commentLikeButton.setFont(new Font("Arial", Font.PLAIN, 14));
             commentLikeButton.setBackground(Color.pink); // 배경색
             commentLikeButton.setBorderPainted(false); // 기본 테두리 없애기
             commentLikeButton.setFocusPainted(false); // 포커스 테두리 없애기
-            commentLikeButton.setBounds(700, textHeight + 10, 50,30); // 위치 설정
+            commentLikeButton.setBounds(700, textHeight+10 , 60,30); // 위치 설정
+            commentLikeButton.setMargin(new Insets(0, 0, 0, 0));
+
 
             // 좋아요 버튼 클릭 이벤트 (각 댓글마다 토글)
             commentLikeButton.addActionListener(e -> {
-                if (commentLikeButton.getText().equals("like")) {
-                    commentLikeButton.setText("unlike");
+                if (commentLikeButton.getText().equals("like "+commentLikeCount)) {
+                	databaseService.addLikeToComment(currentUserId, commentID);
+                    commentLikeButton.setText("unlike " + (commentLikeCount + 1));
                     commentLikeButton.setForeground(Color.red);
                 } else {
-                    commentLikeButton.setText("like");
+                    databaseService.removeLikeFromComment(currentUserId, commentID);
+                    commentLikeButton.setText("like " + (commentLikeCount));
                     commentLikeButton.setForeground(Color.WHITE);
                 }
             });
@@ -446,17 +489,6 @@ public class Article {
             public void mouseClicked(MouseEvent e) {
                 // 클릭했을 때 수행할 기능
                 JOptionPane.showMessageDialog(articlePanel, "User profile clicked!"); // 예시로 메시지 출력
-                Container parent = articlePanel.getParent();
-
-                if (parent != null) {
-                    parent.remove(articlePanel); // 현재 Article 패널 제거
-                    OtherProfile otherProfile = new OtherProfile(); // OtherProfile 객체 생성
-                    parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
-                    parent.revalidate(); // UI 갱신
-                    parent.repaint(); // 화면 갱신
-                } else {
-                    JOptionPane.showMessageDialog(articlePanel, "Parent container not found.");
-                }
             }
         });
 
@@ -468,10 +500,9 @@ public class Article {
         // 전체 패널 재배치
         articlePanel.revalidate();
         articlePanel.repaint();
-
-              
+   
     }
-
+    
     // 하단선 업데이트 메서드 (필요 시 추가로 업데이트 가능)
     public void updateLowerLinePosition(int newY) {
         horizontalLineLower.setBounds(0, newY, 800, 1);
@@ -489,4 +520,7 @@ public class Article {
         return scrollPane;
     }
 }
+
+//1차완
+//새로운 코멘트 아이디 지정해줘야함.
 
