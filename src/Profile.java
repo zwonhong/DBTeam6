@@ -261,8 +261,8 @@ public class Profile {
         cardPanel.setBounds(0, 390, 850, 300);
 
         // TestArticle, TestComments, TestLikes에서 패널 가져오기
-        TestArticle testArticle = new TestArticle();
-        TestComments testComments = new TestComments();
+        TestArticle testArticle = new TestArticle(userID);
+        TestComments testComments = new TestComments(userID);
         TestLikes testLikes = new TestLikes();
 
         JScrollPane articleScrollPane = new JScrollPane(testArticle.getArticlePanel());
