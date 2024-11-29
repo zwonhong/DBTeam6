@@ -121,23 +121,55 @@ public class OtherProfile {
         joinDateLabel.setBounds(180, 305, 200, 20); // 가입일 위치
         profilePanel.add(joinDateLabel);
 
-        JButton followButton = new JButton("Follow");
-            followButton.setBounds(720, 210, 80, 30);
-            followButton.setForeground(Color.WHITE);
-            followButton.setBackground(Color.PINK);
-            followButton.setFont(new Font("Arial", Font.PLAIN, 12));
-            followButton.setBorderPainted(false);
-            followButton.setFocusPainted(false);
-            followButton.addActionListener(e -> {
-                if (followButton.getText().equals("Follow")) {
-                    followButton.setText("unFollow");
-                    followButton.setForeground(Color.RED);
+        // 팔로우 버튼 생성
+        JButton followButton = new JButton();
+        followButton.setBounds(720, 210, 80, 30);
+        followButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        followButton.setBorderPainted(false);
+        followButton.setFocusPainted(false);
+
+        // 버튼 초기 상태 설정 함수
+        Runnable updateFollowButtonState = () -> {
+            boolean isFollowing = UserProfileManager.isFollowing(userID);
+            if (isFollowing) {
+                followButton.setText("unFollow");
+                followButton.setForeground(Color.RED);
+                followButton.setBackground(Color.WHITE); // 추가적인 시각적 구분 (옵션)
+            } else {
+                followButton.setText("Follow");
+                followButton.setForeground(Color.WHITE);
+                followButton.setBackground(Color.PINK);
+            }
+        };
+
+        // 초기 버튼 상태 로드
+        updateFollowButtonState.run();
+
+        // 버튼 이벤트 추가
+        followButton.addActionListener(e -> {
+            if (followButton.getText().equals("Follow")) {
+                boolean success = UserProfileManager.followUser(userID);
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "Successfully followed user!");
                 } else {
-                    followButton.setText("Follow");
-                    followButton.setForeground(Color.WHITE);
+                    JOptionPane.showMessageDialog(null, "Failed to follow user.");
                 }
-            });
-            profilePanel.add(followButton);
+            } else {
+                boolean success = UserProfileManager.unfollowUser(userID);
+                if (success) {
+                    JOptionPane.showMessageDialog(null, "Successfully unfollowed user!");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Failed to unfollow user.");
+                }
+            }
+
+            // 버튼 상태 업데이트 (DB 변경 후 최신 상태 반영)
+            updateFollowButtonState.run();
+        });
+
+        // 버튼 추가
+        profilePanel.add(followButton);
+
 
         // 토글 버튼 패널
         JPanel togglePanel = new JPanel();
@@ -173,8 +205,8 @@ public class OtherProfile {
         cardPanel.setBounds(0, 390, 850, 300);
 
         // TestArticle, TestComments, TestLikes에서 패널 가져오기
-        TestArticle testArticle = new TestArticle();
-        TestComments testComments = new TestComments();
+        TestArticle testArticle = new TestArticle(userID);
+        TestComments testComments = new TestComments(userID);
         TestLikes testLikes = new TestLikes();
 
         JScrollPane articleScrollPane = new JScrollPane(testArticle.getArticlePanel());
