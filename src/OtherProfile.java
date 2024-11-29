@@ -7,6 +7,20 @@ import java.io.File;
 import java.io.IOException;
 
 public class OtherProfile {
+    private String userID; // userID 필드 추가
+    private JLabel NicknameLabel;
+    private JLabel joinDateLabel;
+    private JLabel introductionLabel;
+    private final String[] profileImagePath = { UserProfileManager.getImagePath(userID) }; // 데이터베이스에서 프로필 이미지 경로 가져오기
+    private final String[] backgroundImagePath = {UserProfileManager.getwallPaperPath(userID)};
+    private JPanel profileImagePanel;
+    private JPanel topGrayPanel;
+
+    public OtherProfile(String userID) {
+        this.userID = userID; // user_ID 저장
+        getProfilePanel();
+        loadUserData();
+    }
 
     // 프로필 화면 반환 메서드
     public JPanel getProfilePanel() {
@@ -15,12 +29,8 @@ public class OtherProfile {
         profilePanel.setLayout(null); // 자유 배치
         profilePanel.setBounds(0, 0, 850, 700); // 오른쪽 패널 크기 설정 (고정값)
 
-        // 프로필 이미지 파일 경로
-        final String profileImagePath = "D:\\DBTermProject\\lib\\defaultProfile.png";
-        final String backgroundImagePath = null; // 상단 배경 이미지 초기값은 널값으로 설정 (회색 배경)
-
         // 프로필 이미지 (원형 패널로 생성)
-        JPanel profileImagePanel = new JPanel() {
+        profileImagePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -30,7 +40,7 @@ public class OtherProfile {
                 // 이미지 로드
                 BufferedImage profileImage = null;
                 try {
-                    profileImage = ImageIO.read(new File(profileImagePath)); // 이미지 경로
+                    profileImage = ImageIO.read(new File(profileImagePath[0])); // 이미지 경로
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -54,14 +64,14 @@ public class OtherProfile {
         profilePanel.add(profileImagePanel); // 프로필 이미지를 먼저 추가
 
         // 상단 회색 배경
-        JPanel topGrayPanel = new JPanel() {
+        topGrayPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (backgroundImagePath != null) {
+                if (backgroundImagePath[0] != null) {
                     try {
                         // 배경 이미지 로드 및 그리기
-                        BufferedImage backgroundImage = ImageIO.read(new File(backgroundImagePath));
+                        BufferedImage backgroundImage = ImageIO.read(new File(backgroundImagePath[0]));
                         g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), null);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -77,50 +87,57 @@ public class OtherProfile {
         profilePanel.add(topGrayPanel, Integer.valueOf(0)); // 배경을 항상 뒤에 추가
 
         // 사용자 이름 라벨
-        JLabel NicknameLabel = new JLabel("Others");
+        NicknameLabel = new JLabel("Others");
         NicknameLabel.setForeground(Color.WHITE);
         NicknameLabel.setFont(new Font("Arial", Font.BOLD, 20));
         NicknameLabel.setBounds(220, 210, 200, 30); // 이름 위치
         profilePanel.add(NicknameLabel);
 
         // 사용자 아이디 라벨
-        JLabel UsernameLabel = new JLabel("@userName");
+        JLabel UsernameLabel = new JLabel("@" + userID);
         UsernameLabel.setForeground(Color.GRAY);
         UsernameLabel.setFont(new Font("Arial", Font.PLAIN, 15));
         UsernameLabel.setBounds(230, 240, 200, 20); // 이름 위치
         profilePanel.add(UsernameLabel);
 
         // 상태 표시 라벨
-        JLabel nowLabel = new JLabel("Hello, World!");
-        nowLabel.setForeground(Color.GRAY);
-        nowLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        nowLabel.setBounds(80, 285, 200, 20); // 위치 설정
-        profilePanel.add(nowLabel);
+        introductionLabel = new JLabel("Hello, World!");
+        introductionLabel.setForeground(Color.GRAY);
+        introductionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        introductionLabel.setBounds(80, 285, 200, 20); // 위치 설정
+        profilePanel.add(introductionLabel);
 
         // 가입일 라벨
-        JLabel joinDateLabel = new JLabel("Subscription: day");
+        JLabel subscribeLabel = new JLabel("Subscription :");
+        subscribeLabel.setForeground(Color.GRAY);
+        subscribeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        subscribeLabel.setBounds(80, 305, 200, 20); // 가입일 위치
+        profilePanel.add(subscribeLabel);
+
+        // 가입일 라벨
+        joinDateLabel = new JLabel();
         joinDateLabel.setForeground(Color.GRAY);
         joinDateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        joinDateLabel.setBounds(80, 305, 200, 20); // 가입일 위치
+        joinDateLabel.setBounds(180, 305, 200, 20); // 가입일 위치
         profilePanel.add(joinDateLabel);
 
-        JButton likeButton = new JButton("Follow");
-            likeButton.setBounds(720, 210, 80, 30);
-            likeButton.setForeground(Color.WHITE);
-            likeButton.setBackground(Color.PINK);
-            likeButton.setFont(new Font("Arial", Font.PLAIN, 12));
-            likeButton.setBorderPainted(false);
-            likeButton.setFocusPainted(false);
-            likeButton.addActionListener(e -> {
-                if (likeButton.getText().equals("Follow")) {
-                    likeButton.setText("unFollow");
-                    likeButton.setForeground(Color.RED);
+        JButton followButton = new JButton("Follow");
+            followButton.setBounds(720, 210, 80, 30);
+            followButton.setForeground(Color.WHITE);
+            followButton.setBackground(Color.PINK);
+            followButton.setFont(new Font("Arial", Font.PLAIN, 12));
+            followButton.setBorderPainted(false);
+            followButton.setFocusPainted(false);
+            followButton.addActionListener(e -> {
+                if (followButton.getText().equals("Follow")) {
+                    followButton.setText("unFollow");
+                    followButton.setForeground(Color.RED);
                 } else {
-                    likeButton.setText("Follow");
-                    likeButton.setForeground(Color.WHITE);
+                    followButton.setText("Follow");
+                    followButton.setForeground(Color.WHITE);
                 }
             });
-            profilePanel.add(likeButton);
+            profilePanel.add(followButton);
 
         // 토글 버튼 패널
         JPanel togglePanel = new JPanel();
@@ -178,6 +195,52 @@ public class OtherProfile {
         toggle3.addActionListener(e -> cl.show(cardPanel, "Likes"));
 
         return profilePanel;
+    }
+
+    private void loadUserData() {
+        SwingUtilities.invokeLater(() -> {
+            // 닉네임 가져오기
+            String nickname = UserProfileManager.getNickname(userID);
+            if (nickname != null && !nickname.isEmpty()) {
+                NicknameLabel.setText(nickname);
+            } else {
+                NicknameLabel.setText("No nickname found");
+            }
+    
+            // 생성일 가져오기
+            String joinDate = UserProfileManager.getCreateTime(userID);
+            if (joinDate != null && !joinDate.isEmpty()) {
+                joinDateLabel.setText(joinDate);
+            } else {
+                joinDateLabel.setText("No join date found");
+            }
+
+            // 소개글 가져오기
+            String introduction = UserProfileManager.getIntroduction(userID);
+            if (introduction != null && !introduction.isEmpty()) {
+                introductionLabel.setText(introduction);
+            } else {
+                introductionLabel.setText("No introduction found");
+            }
+
+            // 프로필 이미지 경로 가져오기
+            String imagePath = UserProfileManager.getImagePath(userID);
+            if (imagePath != null && !imagePath.isEmpty()) {
+                profileImagePath[0] = imagePath; // 경로 저장
+            } else {
+                profileImagePath[0] = UserProfileManager.DEFAULT_PROFILE_IMAGE; // 기본 이미지로 설정
+            }
+            profileImagePanel.repaint(); // 패널 다시 그리기
+            
+            // 프로필 이미지 경로 가져오기
+            String wallPaperPath = UserProfileManager.getwallPaperPath(userID);
+            if (wallPaperPath != null && !wallPaperPath.isEmpty()) {
+                backgroundImagePath[0] = wallPaperPath; // 경로 저장
+            } else {
+                backgroundImagePath[0] = null; // 기본 이미지로 설정
+            }
+            profileImagePanel.repaint(); // 패널 다시 그리기
+        });
     }
 
     // 원형 이미지를 생성하는 메서드

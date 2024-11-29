@@ -39,60 +39,112 @@ public class UserProfileManager {
         }
         return create_time;
     }
-    /*
-    public static boolean updateUserSettings(int userId, String newNickname, String currentPassword, String newPassword, String phone, String gender) {
-        if (newPassword != null && newPassword.length() < 8) {
-            JOptionPane.showMessageDialog(null, "Password must be at least 8 characters long.");
-            return false;
-        }
 
-        if (gender == null) {
-            JOptionPane.showMessageDialog(null, "Please select a gender.");
-            return false;
-        }
-        
-    
-        if (phone != null && phone.length() != 13) {
-            JOptionPane.showMessageDialog(null, "Phone number must be 13 characters long.");
-            return false;
-        }
-    
+    public static String getIntroduction(String userId) {
+        String introduction = null;
         try (Connection conn = DBManager.getConnection()) {
-            // 현재 비밀번호 확인
-            String passwordQuery = "SELECT password FROM Users WHERE User_ID = ?";
-            PreparedStatement passwordStmt = conn.prepareStatement(passwordQuery);
-            passwordStmt.setInt(1, userId);
-            ResultSet rs = passwordStmt.executeQuery();
-            if (rs.next() && !rs.getString("password").equals(currentPassword)) {
-                JOptionPane.showMessageDialog(null, "Current password is incorrect.");
-                return false;
+            String query = "SELECT introduction FROM Users WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                introduction = rs.getString("introduction");
             }
-    
-            // 업데이트 쿼리 생성
-            String updateQuery = "UPDATE Users SET "
-                    + (newNickname != null ? "nickname = ?, " : "")
-                    + (phone != null ? "phoneNum = ?, " : "")
-                    + (newPassword != null ? "password = ?, " : "")
-                    + (gender != null ? "gender = ? " : "")
-                    + "WHERE User_ID = ?";
-            PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
-    
-            // 파라미터 설정
-            int paramIndex = 1;
-            if (newNickname != null) updateStmt.setString(paramIndex++, newNickname);
-            if (phone != null) updateStmt.setString(paramIndex++, phone);
-            if (newPassword != null) updateStmt.setString(paramIndex++, newPassword);
-            if (gender != null) updateStmt.setString(paramIndex++, gender);
-            updateStmt.setInt(paramIndex, userId);
-    
-            // 쿼리 실행
-            int rowsUpdated = updateStmt.executeUpdate();
-            return rowsUpdated > 0; // 업데이트 성공 여부 반환
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error updating user settings: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Error fetching introduction: " + e.getMessage());
         }
-        return false;
-    }*/
+        return introduction;
+    }
+
+    public static final String DEFAULT_PROFILE_IMAGE = "D:/DBforGIT/DBTeam6/lib/defaultProfile.png";
+
+    public static String getImagePath(String userId) {
+        String imagePath = null;
+        try (Connection conn = DBManager.getConnection()) {
+            String query = "SELECT profilImg FROM Users WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                imagePath = rs.getString("profilImg");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error fetching profile image path: " + e.getMessage());
+        }
+        return (imagePath != null && !imagePath.isEmpty()) ? imagePath : DEFAULT_PROFILE_IMAGE;
+    }
+
+    public static String getwallPaperPath(String userId) {
+        String wallPaperPath = null;
+        try (Connection conn = DBManager.getConnection()) {
+            String query = "SELECT wallPaper FROM Users WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                wallPaperPath = rs.getString("wallPaper");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error fetching wallpaper path: " + e.getMessage());
+        }
+        return (wallPaperPath != null && !wallPaperPath.isEmpty()) ? wallPaperPath : null;
+    }
+    
+
+    public static boolean saveIntroduction(String userId, String newIntroduction) {
+        boolean isSaved = false;
+        try (Connection conn = DBManager.getConnection()) {
+            String query = "UPDATE Users SET introduction = ? WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, newIntroduction);
+            pstmt.setString(2, userId);
+    
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                isSaved = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving introduction: " + e.getMessage());
+        }
+        return isSaved;
+    }
+
+    public static boolean saveImagePath(String userId, String imagePath) {
+        boolean isSaved = false;
+        try (Connection conn = DBManager.getConnection()) {
+            String query = "UPDATE Users SET profilImg = ? WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, imagePath);
+            pstmt.setString(2, userId);
+    
+            int rowsUpdated = pstmt.executeUpdate();
+            isSaved = rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving profile image path: " + e.getMessage());
+        }
+        return isSaved;
+    }
+
+    public static boolean saveWallPaperPath(String userId, String wallPaperPath) {
+        boolean isSaved = false;
+        try (Connection conn = DBManager.getConnection()) {
+            String query = "UPDATE Users SET wallPaper = ? WHERE User_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, wallPaperPath);
+            pstmt.setString(2, userId);
+    
+            int rowsUpdated = pstmt.executeUpdate();
+            isSaved = rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error saving wall paper path: " + e.getMessage());
+        }
+        return isSaved;
+    }
 }
     

@@ -10,6 +10,11 @@ public class Profile {
     private String userID; // userID 필드 추가
     private JLabel NicknameLabel;
     private JLabel joinDateLabel;
+    private JLabel introductionLabel;
+    private final String[] profileImagePath = { UserProfileManager.getImagePath(userID) }; // 데이터베이스에서 프로필 이미지 경로 가져오기
+    private final String[] backgroundImagePath = {UserProfileManager.getwallPaperPath(userID)};
+    private JPanel profileImagePanel;
+    private JPanel topGrayPanel;
 
     public Profile(String userID) {
         this.userID = userID; // user_ID 저장
@@ -24,11 +29,8 @@ public class Profile {
         profilePanel.setLayout(null); // 자유 배치
         profilePanel.setBounds(0, 0, 850, 700); // 오른쪽 패널 크기 설정 (고정값)
 
-        // 프로필 이미지 파일 경로
-        final String[] profileImagePath = { "D:\\DBTermProject\\lib\\defaultProfile.png" };
-        final String[] backgroundImagePath = {null}; // 상단 배경 이미지 초기값은 널값으로 설정 (회색 배경)
         // 프로필 이미지 (원형 패널로 생성)
-        JPanel profileImagePanel = new JPanel() {
+        profileImagePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -65,20 +67,28 @@ public class Profile {
         profileImagePanel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser(); // 파일 선택 창 생성
+                JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Choose Profile Image");
-                int result = fileChooser.showOpenDialog(null); // 파일 선택 창 열기
-
+                int result = fileChooser.showOpenDialog(null);
+        
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                    profileImagePath[0] = selectedFile.getAbsolutePath(); // 선택한 파일 경로 저장
-                    profileImagePanel.repaint(); // 이미지 변경 후 패널 다시 그리기
+                    String newImagePath = selectedFile.getAbsolutePath();
+                    
+                    // 데이터베이스에 경로 저장
+                    if (UserProfileManager.saveImagePath(userID, newImagePath)) {
+                        profileImagePath[0] = newImagePath; // 경로 저장
+                        profileImagePanel.repaint(); // 변경된 이미지 다시 그리기
+                        JOptionPane.showMessageDialog(null, "Profile image updated successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to update profile image path.");
+                    }
                 }
             }
-        });
+        });  
 
         // 상단 회색 배경 (이미지 변경 가능)
-        JPanel topGrayPanel = new JPanel() {
+        topGrayPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -104,17 +114,26 @@ public class Profile {
         topGrayPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser(); // 파일 선택 창 생성
-                fileChooser.setDialogTitle("Choose Background Image");
-                int result = fileChooser.showOpenDialog(null); // 파일 선택 창 열기
-
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Choose Profile Image");
+                int result = fileChooser.showOpenDialog(null);
+        
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
-                    backgroundImagePath[0] = selectedFile.getAbsolutePath(); // 선택한 파일 경로 저장
-                    topGrayPanel.repaint(); // 배경 이미지 변경 후 패널 다시 그리기
+                    String newWallPaperPath = selectedFile.getAbsolutePath();
+                    
+                    // 데이터베이스에 경로 저장
+                    if (UserProfileManager.saveWallPaperPath(userID, newWallPaperPath)) {
+                        backgroundImagePath[0] = newWallPaperPath; // 경로 저장
+                        topGrayPanel.repaint(); // 변경된 이미지 다시 그리기
+                        JOptionPane.showMessageDialog(null, "Wallpaper image updated successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to update Wallpaper image path.");
+                    }
                 }
             }
         });
+        
 
         // 사용자 이름 라벨
         NicknameLabel = new JLabel();
@@ -131,7 +150,7 @@ public class Profile {
         profilePanel.add(UsernameLabel);
 
         // 상태 표시 라벨
-        JLabel introductionLabel = new JLabel("Put your introduction");
+        introductionLabel = new JLabel("Put your introduction");
         introductionLabel.setForeground(Color.GRAY);
         introductionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         introductionLabel.setBounds(80, 285, 200, 20); // 위치 설정
@@ -163,10 +182,16 @@ public class Profile {
         // **nowTextField 입력 완료 이벤트 (Enter 키로 업데이트)**
         introductionTextField.addActionListener(e -> {
             String updatedText = introductionTextField.getText().trim(); // 입력된 텍스트 가져오기
-            introductionLabel.setText(updatedText.isEmpty() ? "Update your introduction." : updatedText); // 비어있으면 기본값 유지
+            if (UserProfileManager.saveIntroduction(userID, updatedText)) {
+                introductionLabel.setText(updatedText.isEmpty() ? "Update your introduction." : updatedText); // 업데이트된 텍스트 반영
+                JOptionPane.showMessageDialog(null, "Introduction updated successfully!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Failed to update introduction.");
+            }
             introductionTextField.setVisible(false); // 텍스트필드 숨김
             introductionLabel.setVisible(true); // 라벨 다시 표시
         });
+
 
         // 가입일: 라벨
         JLabel printJoinDateLabel = new JLabel("Subcription :");
@@ -261,22 +286,51 @@ public class Profile {
     }
 
     private void loadUserData() {
-        // 닉네임 가져오기
-        String nickname = UserProfileManager.getNickname(userID);
-        if (nickname != null) {
-            NicknameLabel.setText(nickname);
-        } else {
-            NicknameLabel.setText("No nickname found");
-        }
+        SwingUtilities.invokeLater(() -> {
+            // 닉네임 가져오기
+            String nickname = UserProfileManager.getNickname(userID);
+            if (nickname != null && !nickname.isEmpty()) {
+                NicknameLabel.setText(nickname);
+            } else {
+                NicknameLabel.setText("No nickname found");
+            }
     
-        // 전화번호 가져오기
-        String joinDate = UserProfileManager.getCreateTime(userID);
-        if (joinDate != null) {
-            joinDateLabel.setText(joinDate);
-        } else {
-            joinDateLabel.setText("No phone number found");
-        }
+            // 생성일 가져오기
+            String joinDate = UserProfileManager.getCreateTime(userID);
+            if (joinDate != null && !joinDate.isEmpty()) {
+                joinDateLabel.setText(joinDate);
+            } else {
+                joinDateLabel.setText("No join date found");
+            }
+
+            // 소개글 가져오기
+            String introduction = UserProfileManager.getIntroduction(userID);
+            if (introduction != null && !introduction.isEmpty()) {
+                introductionLabel.setText(introduction);
+            } else {
+                introductionLabel.setText("No introduction found");
+            }
+
+            // 프로필 이미지 경로 가져오기
+            String imagePath = UserProfileManager.getImagePath(userID);
+            if (imagePath != null && !imagePath.isEmpty()) {
+                profileImagePath[0] = imagePath; // 경로 저장
+            } else {
+                profileImagePath[0] = UserProfileManager.DEFAULT_PROFILE_IMAGE; // 기본 이미지로 설정
+            }
+            profileImagePanel.repaint(); // 패널 다시 그리기
+            
+            // 프로필 이미지 경로 가져오기
+            String wallPaperPath = UserProfileManager.getwallPaperPath(userID);
+            if (wallPaperPath != null && !wallPaperPath.isEmpty()) {
+                backgroundImagePath[0] = wallPaperPath; // 경로 저장
+            } else {
+                backgroundImagePath[0] = null; // 기본 이미지로 설정
+            }
+            profileImagePanel.repaint(); // 패널 다시 그리기
+        });
     }
+    
 
     // 원형 이미지를 생성하는 메서드
     private BufferedImage createCircularImage(BufferedImage image, int diameter) {

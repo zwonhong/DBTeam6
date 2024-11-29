@@ -1,4 +1,4 @@
-package twitter;
+// package twitter;
 import java.awt.*;
 import javax.swing.*;
 
