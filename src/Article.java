@@ -16,8 +16,13 @@ public class Article {
     private String currentArticleId; //게시물 아이디
     private String currentUserId; //접속하고 있는 유저 아이디
     
+    
+    
     public Article(String articleId, String userId) {
-        
+    	
+    	String defaultProfileImagePath = "C://yerim//java//twitter//src//main//java//default_profile.png";
+
+
         // 데이터베이스 연결 초기화
         this.databaseService = new DatabaseService();
     	
@@ -65,7 +70,7 @@ public class Article {
         userPanel.setBounds(10, 60, 800, 40); // 패널 위치
 
         // 프로필 이미지 버튼 (원형 이미지)
-        String profileImagePath = articleDetails != null ? articleDetails.getProfileImg() : "default_profile.png";
+        String profileImagePath = articleDetails != null ? articleDetails.getProfileImg() : defaultProfileImagePath;
         ImageIcon profileImageIcon = new ImageIcon(profileImagePath);
         Image profileImage = profileImageIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH); // 크기 조정
 
@@ -303,8 +308,9 @@ public class Article {
         
         
      //------------------댓글 입력창 옆에 프로필 이미지 버튼 추가-----------------
+        
         DatabaseService.UserProfile userProfile = databaseService.getUserProfile(currentUserId);
-        String userprofileImagePath = userProfile != null ? userProfile.getProfileImg() : "default_profile.png";
+        String userprofileImagePath = userProfile != null ? userProfile.getProfileImg() : defaultProfileImagePath;
         ImageIcon userProfileImageIcon = new ImageIcon(userprofileImagePath);
         Image userprofileImage = userProfileImageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
 
@@ -394,7 +400,7 @@ public class Article {
             commentPanel.add(commentTextArea);
 
             // ------------------------댓글 작성자의 프로필 이미지-------------------            
-            String commentprofileImagePath = CommentDetails != null ? comment.getProfileImg() : "default_profile.png";
+            String commentprofileImagePath = CommentDetails != null ? comment.getProfileImg() : defaultProfileImagePath;
             ImageIcon commentProfileImageIcon = new ImageIcon(commentprofileImagePath);
             Image commentProfileImage = commentProfileImageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             
@@ -528,7 +534,3 @@ public class Article {
         return scrollPane;
     }
 }
-
-//1차완
-//새로운 코멘트 아이디 지정해줘야함.
-
