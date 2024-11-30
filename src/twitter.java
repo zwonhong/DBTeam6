@@ -27,7 +27,7 @@ public class twitter {
     }
 
     private static void initializeUI() {
-        ImageIcon originalImg = new ImageIcon("D:\\DBTermProject\\lib\\twitter_logo.png");
+        ImageIcon originalImg = new ImageIcon("lib/twitter_logo.png");
         //각자 파일 로컬에 저장해서 알아서 주소 다시 붙여넣어야 합니다
         //이미지 이름은 모두 통일해서 쓰는 걸로 합시다
 
