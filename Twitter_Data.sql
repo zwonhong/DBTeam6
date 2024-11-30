@@ -107,3 +107,51 @@ INSERT INTO Likes (user_ID, article_ID, comment_ID) VALUES
 ('Naruto', '13', 'C13'),
 ('Naruto', '14', 'C14'),
 ('Shinchan', '15', 'C15');
+
+INSERT INTO users (User_ID, nickname, password)
+VALUES
+('1', 'Zehn', '12345'),
+('2', 'John', '12345678');
+
+INSERT INTO articles (Articles_ID, user_ID, contents, create_time) VALUES
+('A001', '1', 'This is the first article about database design.', '2024-11-29 10:00:00'),
+('A002', '1', 'An insightful post on improving SQL queries.', '2024-11-29 10:15:00'),
+('A003', '1', 'Exploring the basics of foreign keys in relational databases.', '2024-11-29 10:30:00'),
+('A004', '1', 'A comprehensive guide to primary keys.', '2024-11-29 10:45:00'),
+('A005', '1', 'How to optimize table indexing for performance.', '2024-11-29 11:00:00'),
+('A006', '2', 'Understanding the role of JOIN operations in SQL.', '2024-11-29 11:15:00'),
+('A007', '2', '10 tips for writing efficient database queries.', '2024-11-29 11:30:00'),
+('A008', '2', 'Explaining the difference between UNION and UNION ALL.', '2024-11-29 11:45:00'),
+('A009', '2', 'An overview of normalization techniques.', '2024-11-29 12:00:00'),
+('A010', '2', 'When to use indexes in large datasets.', '2024-11-29 12:15:00');
+
+INSERT INTO comments (Comment_ID, user_ID, article_ID, create_time, contents) VALUES
+('C001', '1', 'A001', '2024-11-29 13:00:00', 'Great article! Very informative.'),
+('C002', '1', 'A002', '2024-11-29 13:15:00', 'Thanks for sharing these tips.'),
+('C003', '1', 'A003', '2024-11-29 13:30:00', 'Could you elaborate on foreign keys?'),
+('C004', '1', 'A004', '2024-11-29 13:45:00', 'This guide is super helpful.'),
+('C005', '1', 'A005', '2024-11-29 14:00:00', 'Indexing made easy! Thanks!'),
+('C006', '1', 'A006', '2024-11-29 14:15:00', 'JOINs are tricky but necessary.'),
+('C007', '1', 'A007', '2024-11-29 14:30:00', 'Awesome tips on query efficiency.'),
+('C008', '2', 'A001', '2024-11-29 14:45:00', 'This was exactly what I was looking for.'),
+('C009', '2', 'A002', '2024-11-29 15:00:00', 'Can you provide more examples?'),
+('C010', '2', 'A003', '2024-11-29 15:15:00', 'Good overview of foreign keys.'),
+('C011', '2', 'A004', '2024-11-29 15:30:00', 'Primary keys are simple yet essential.'),
+('C012', '2', 'A005', '2024-11-29 15:45:00', 'Clear explanation of indexing.'),
+('C013', '2', 'A008', '2024-11-29 16:00:00', 'UNION ALL vs UNION is now clear.'),
+('C014', '2', 'A009', '2024-11-29 16:15:00', 'Normalization techniques are crucial.');
+
+INSERT INTO likes (user_ID, article_ID, comment_ID) VALUES
+('1', 'A001', NULL),
+('1', NULL, 'C001'),
+('1', 'A002', NULL),
+('2', NULL, 'C008'),
+('2', 'A006', NULL),
+('2', NULL, 'C014'),
+('1', 'A006', NULL),
+('2', 'A003', NULL);
+
+INSERT INTO following (Following_ID, user_ID)
+VALUES
+('F001', '1'),
+('F002', '2');
