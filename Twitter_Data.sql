@@ -83,6 +83,7 @@ INSERT INTO Comments (comment_ID, user_ID, article_ID, contents) VALUES
 ('C14', 'Naruto', '14', 'Shadow clones are hard but fun~'),
 ('C15', 'Shinchan', '15', 'Bong Miseon is really amazing!');
 
+ /* 
 INSERT INTO Recomments (recomment_ID, user_ID, article_ID, contents) VALUES
 ('R01', 'Luffy', '01', 'Yes, Ace was really precious!'),
 ('R02', 'Shinchan', '02', 'Jjanga and Hwandungie are both so cute~'),
@@ -99,6 +100,7 @@ INSERT INTO Recomments (recomment_ID, user_ID, article_ID, contents) VALUES
 ('R13', 'Naruto', '13', 'Madara is truly a legend!'),
 ('R14', 'Naruto', '14', 'Shadow clones are all about practice!'),
 ('R15', 'Shinchan', '15', 'Bong Miseon is really amazing!');
+  */
 
 INSERT INTO Likes (user_ID, article_ID, comment_ID) VALUES
 ('Luffy', '01', 'C01'),
