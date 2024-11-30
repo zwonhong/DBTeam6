@@ -1,4 +1,4 @@
-// package twitter;
+package twitter;
 import java.awt.*;
 import java.sql.*;
 import java.io.File;
@@ -101,7 +101,7 @@ public class Article {
             if (parent != null) {
                 parent.remove(articlePanel); // 현재 Article 패널 제거
 //임의 데이터
-                OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
+                OtherProfile otherProfile = new OtherProfile(articleDetails.getuserID()); // OtherProfile 객체 생성
                 parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
                 parent.revalidate(); // UI 갱신
                 parent.repaint(); // 화면 갱신
@@ -147,8 +147,7 @@ public class Article {
 
                 if (parent != null) {
                     parent.remove(articlePanel); // 현재 Article 패널 제거
-// 임의 데이터
-                    OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
+                    OtherProfile otherProfile = new OtherProfile(articleDetails.getuserID()); // OtherProfile 객체 생성
                     parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
                     parent.revalidate(); // UI 갱신
                     parent.repaint(); // 화면 갱신
@@ -335,22 +334,6 @@ public class Article {
         // 이미지 버튼을 댓글 입력칸 왼쪽에 배치
         userprofileImageButton.setBounds(20, tweetPanel.getY() + tweetPanel.getHeight() + 70, 40, 40);  // 위치 설정
 
-        // 이미지 버튼에 클릭 이벤트 추가
-        userprofileImageButton.addActionListener(e -> {
-            // 이미지 버튼 클릭 시 수행할 기능
-        	Container parent = articlePanel.getParent();
-
-            if (parent != null) {
-                parent.remove(articlePanel); // 현재 Article 패널 제거
-// 임의 데이터
-                OtherProfile otherProfile = new OtherProfile("2"); // OtherProfile 객체 생성
-                parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
-                parent.revalidate(); // UI 갱신
-                parent.repaint(); // 화면 갱신
-            } else {
-                JOptionPane.showMessageDialog(articlePanel, "Parent container not found.");
-            }
-        });
 
         // 트윗 내용 패널에 이미지 버튼 추가
         articlePanel.add(userprofileImageButton);
@@ -380,6 +363,7 @@ public class Article {
         
         for (DatabaseService.CommentDetails comment : CommentDetails) {
         	String commentID = comment !=null ? comment.getcommentID(): "Unknown";
+        	 String commentuserId = comment !=null ?comment.getuserID(): "Unknown";
         	// 댓글 내용의 높이 계산
             JTextArea commentTextArea = new JTextArea(comment.getContent());
             commentTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -444,6 +428,27 @@ public class Article {
             commentTimeLabel.setForeground(Color.GRAY);
             commentTimeLabel.setFont(new Font("Arial", Font.PLAIN, 12));
             commentPanel.add(commentTimeLabel);
+            
+            // 패널에 클릭 이벤트 추가
+            commentPanel.addMouseListener(new MouseAdapter() {
+            	 @Override
+                 public void mouseClicked(MouseEvent e) {
+                     // 클릭했을 때 수행할 기능
+                     JOptionPane.showMessageDialog(articlePanel, "User profile clicked!"); // 예시로 메시지 출력
+                     // 현재 articlePanel을 포함하는 최상위 Container 가져오기
+                     Container parent = articlePanel.getParent();
+
+                     if (parent != null) {
+                         parent.remove(articlePanel); // 현재 Article 패널 제거
+                         OtherProfile otherProfile = new OtherProfile(commentuserId); // OtherProfile 객체 생성
+                         parent.add(otherProfile.getProfilePanel()); // OtherProfile 패널 추가
+                         parent.revalidate(); // UI 갱신
+                         parent.repaint(); // 화면 갱신
+                     } else {
+                         JOptionPane.showMessageDialog(articlePanel, "Parent container not found.");
+                     }
+                 }
+            });
             
          // --------------------------댓글에 좋아요 버튼 추가---------------------------
             int commentLikeCount = CommentDetails != null ? databaseService.getLikesForComment(commentID):0;
