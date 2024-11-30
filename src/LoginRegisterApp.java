@@ -34,7 +34,7 @@ class LoginPanel extends JPanel {
         logoPanel.setBackground(Color.WHITE); // 배경을 흰색으로 설정
 
         // Load and resize the logo
-        ImageIcon originalIcon = new ImageIcon("src/twitter_logo.jpeg");
+        ImageIcon originalIcon = new ImageIcon("lib/twitter_logo.png");
         Image scaledImage = originalIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
