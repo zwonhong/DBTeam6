@@ -3,9 +3,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBManager {
-    private static final String URL = "jdbc:mysql://localhost:3306/twitter?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/X";
     private static final String USER = "root";
-    private static final String PASSWORD = "1234";
+    private static final String PASSWORD = "chldmsfuf1012!";
 
     public static Connection getConnection() {
         try {
@@ -19,7 +19,7 @@ public class DBManager {
         } catch (SQLException e) {
             System.out.println("Database connection failed.");
             e.printStackTrace();
-        }
+        }   
         return null;
     }
 }
