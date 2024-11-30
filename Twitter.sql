@@ -40,13 +40,13 @@ CREATE TABLE Comments (
 );
 
 -- Recomments 테이블
-CREATE TABLE Recomments (
+/*CREATE TABLE Recomments (
     recomment_ID VARCHAR(50) PRIMARY KEY,             
     user_ID VARCHAR(50) NOT NULL,                     
     article_ID VARCHAR(50) NOT NULL,                   
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   
     contents TEXT NOT NULL                            
-);
+);*/
 
 -- Likes 테이블
 CREATE TABLE Likes (
